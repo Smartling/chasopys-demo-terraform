@@ -1,0 +1,117 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.2.RELEASE")
+        classpath("org.eclipse.jgit:org.eclipse.jgit:3.2.0.201312181205-r")
+        classpath("com.netflix.nebula:gradle-info-plugin:2.2.+")
+    }
+}
+
+apply plugin: 'java'
+apply plugin: 'spring-boot'
+apply plugin: 'nebula.info'
+apply plugin: 'groovy'
+
+
+group = 'com.smartling.demo'
+description = 'Smartling Chasopys Demo Service'
+version = '0.1'
+
+[compileJava, compileGroovy, compileTestJava, compileTestGroovy]*.options*.encoding = 'UTF-8'
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+    // Use 'jcenter' for resolving your dependencies.
+    // You can declare any Maven/Ivy/file repository here.
+    jcenter()
+}
+
+ext {
+    springBootVersion = '1.5.2.RELEASE'
+    dockerRepository = 'docker-registry-v2.smartling.net/smartling/chasopys-demo-service'
+    lombokVersion = '1.16.10'
+}
+// In this section you declare the dependencies for your production and test code
+dependencies {
+
+    compile "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
+    compile "org.springframework.boot:spring-boot-actuator:${springBootVersion}"
+
+    compileOnly "org.projectlombok:lombok:${lombokVersion}"
+
+    // We use the latest groovy 2.x version for Spock testing
+    compile 'org.codehaus.groovy:groovy-all:2.4.7'
+
+    // Use the awesome Spock testing and specification framework even with Java
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4'
+    testCompile 'junit:junit:4.12'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.smartling.estimation.EstimationServiceApp'
+        attributes 'Built-By': System.getProperty('user.name')
+        attributes 'Built-Date': (int) new Date().getTime() / 1000
+        attributes 'Revision': getRevision()
+        attributes 'Implementation-Title': 'Rates Management Service',
+                'Implementation-Version': "${version}",
+                'Implementation-Vendor': 'Smartling Inc.',
+                'com/smartling/estimation/'
+    }
+}
+
+def getRevision()
+{
+    return "git rev-parse HEAD".execute().text.trim()
+}
+
+task prepareDockerfile() {
+    def engine = new groovy.text.SimpleTemplateEngine()
+    def binding = ["appJarName": project.jar.archiveName]
+    def template = engine.createTemplate(file('src/docker/Dockerfile.template')).make(binding)
+    def dockerfile = file(new File("Dockerfile"))
+    dockerfile.write(template.toString())
+}
+
+task buildDocker(type: Exec, dependsOn: prepareDockerfile) {
+    description "Builds a docker container of ${project.name}"
+    executable "docker"
+    args "build", "--rm", "-t", "${dockerRepository}:${getBranchVersionTag()}", "."
+}
+
+task tagDocker(type: Exec, dependsOn: buildDocker) {
+    description "tag a docker container of ${project.name} with commit hash"
+    executable "docker"
+    args "tag", "${dockerRepository}:${getBranchVersionTag()}", "${dockerRepository}:${getCommitVersionTag()}"
+}
+
+task pushDockerBranchTag(type: Exec, dependsOn: tagDocker) {
+    description "Push a docker container with tag of branch: ${getBranchVersionTag()}"
+    executable "docker"
+    args "push", "${dockerRepository}:${getBranchVersionTag()}"
+}
+
+task pushDocker(type: Exec, dependsOn: pushDockerBranchTag) {
+    description "Push a docker container with tag of commit: ${getCommitVersionTag()}"
+    executable "docker"
+    args "push", "${dockerRepository}:${getCommitVersionTag()}"
+}
+
+def getBranchName()
+{
+    project.hasProperty('repositoryBranchName') ? repositoryBranchName : "git rev-parse --abbrev-ref HEAD".execute().text.trim()
+}
+
+def getBranchVersionTag()
+{
+    def branchName = getBranchName()
+    branchName == 'master' ? 'latest' : branchName
+}
+
+def getCommitVersionTag()
+{
+    // returns commit sha1 as version tag
+    return "git rev-parse --short HEAD".execute().text.trim()
+}
