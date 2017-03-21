@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# attach instance into ECS cluster
+yum install docker ecs-init aws-cli -y
+service docker start && sleep 10 && start ecs
+echo ECS_CLUSTER=${ecs_cluster_name} > /etc/ecs/ecs.config
+echo ECS_ENGINE_TASK_CLEANUP_WAIT_DURATION=${ecs_cleanup_interval_seconds}s >> /etc/ecs/ecs.config
+echo ECS_DISABLE_IMAGE_CLEANUP=false >> /etc/ecs/ecs.config
+
+# set Smartling DNS servers
+cat <<FILE > /etc/resolv.conf
+search aws.smartling.int smartling.int
+nameserver 172.27.72.53
+nameserver 172.27.76.53
+FILE
+
+# disable PEERDNS to prevent /etc/resolv.conf reset after instance reboot
+/bin/sed 's/^PEERDNS=.*/PEERDNS=no/g' -i /etc/sysconfig/network-scripts/ifcfg-eth0
+
+# specify default hostname e.g. ip-172-27-92-122 in /etc/hosts
+echo -e "127.0.0.1\tlocalhost localhost.localdomain $$(hostname)" > /etc/hosts
+
+
+#install midnight commander
+yum install -y mc
+
+# specify params required by Smartling SOA AMI
+instance_id=$(curl -q http://169.254.169.254/latest/meta-data/instance-id)
+instance_hostname_prefix="${service_name}-${environment_name}"
+instance_hostname="$${instance_hostname_prefix}-$${instance_id}"
+
+
+export HOSTNAME="$${instance_hostname}.aws"
+export FQDN="$${HOSTNAME}.smartling.int"
+/bin/sed "s/^HOSTNAME=.*/HOSTNAME=$${HOSTNAME}/g" -i /etc/sysconfig/network
+echo -ne "127.0.0.1 localhost localhost.localdomain\n127.0.0.1 $FQDN $HOSTNAME\n" > /etc/hosts
+hostname $HOSTNAME
+

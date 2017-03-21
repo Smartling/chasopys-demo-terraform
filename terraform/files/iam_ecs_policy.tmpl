@@ -1,0 +1,56 @@
+{
+	"Statement": [{
+		"Effect": "Allow",
+		"Action": [
+			"ecs:Describe*",
+			"ecs:List*",
+			"ecs:DiscoverPollEndpoint",
+			"ecs:Poll",
+			"ecs:UpdateService",
+                        "autoscaling:DescribeAutoScalingGroups"
+		],
+		"Resource": "*"
+	}, {
+		"Effect": "Allow",
+		"Action": [
+			"ecs:RegisterContainerInstance",
+			"ecs:DeregisterContainerInstance",
+			"ecs:SubmitContainerStateChange",
+			"ecs:SubmitTaskStateChange",
+			"ecs:List*"
+		],
+		"Resource": "${ecs_cluster_arn}"
+	}, {
+		"Effect": "Allow",
+		"Action": [
+			"elasticloadbalancing:Describe*",
+			"elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+			"elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+			"ec2:Describe*",
+			"ec2:AuthorizeSecurityGroupIngress"
+		],
+		"Resource": [
+			"*"
+		]
+	}, {
+		"Effect": "Allow",
+		"Action": [
+			"logs:CreateLogGroup",
+			"logs:CreateLogStream",
+			"logs:PutLogEvents"
+		],
+		"Resource": "arn:aws:logs:*:*:*"
+	}, {
+		"Effect": "Allow",
+		"Action": [
+			"sns:*"
+		],
+		"Resource": ["${autoscale_sns_topic_arn}", "${notifs_sns_topic_arn}"]
+	}, {
+	   "Effect": "Allow",
+	   "Action": [
+		 "s3:*"
+	   ],
+	   "Resource": "arn:aws:s3:::*"
+	 }]
+}
