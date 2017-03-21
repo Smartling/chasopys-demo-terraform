@@ -15,6 +15,6 @@ public class DemoController
     @ResponseBody
     Greeting getGreeting(@PathVariable(name = "text") String text)
     {
-        return new Greeting("Hi, people!" + " " + text);
+        return new Greeting("Hi, people! Your message is: " + text);
     }
 }
