@@ -1,0 +1,9 @@
+# Servlet Container Configuration
+server:
+    port: &PORT 8443
+    ssl:
+        enabled: true
+        key-store: ./keystore.jks
+        key-store-password: smartling
+        key-alias: authentication
+        protocol: TLS
