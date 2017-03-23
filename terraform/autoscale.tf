@@ -9,6 +9,7 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   launch_configuration = "${aws_launch_configuration.ecs_cluster_asg_launch_config.name}"
 
   health_check_grace_period = "${var.asg_healthcheck_grace_period}"
+
   health_check_type = "${var.asg_healthcheck_type}"
 
   load_balancers = ["${split(",", aws_elb.service_elb.id)}"]
