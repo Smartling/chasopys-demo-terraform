@@ -134,5 +134,3 @@ resource "aws_iam_user" "deployer" {
     name = "tf-${var.service_name}-${var.environment_name}-deployer"
     path = "/"
 }
-
-# TODO: add permissions to deployer user here

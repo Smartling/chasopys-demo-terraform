@@ -11,6 +11,9 @@
 	"environment": [{
 		"name": "JAVA_OPTS",
 		"value": " -Xms512m -Xmx512m -XX:+UseConcMarkSweepGC -server -Dfile.encoding=UTF-8 -Dorg.jboss.logging.provider=slf4j -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9112 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.rmi.port=9112 -Dnetworkaddress.cache.ttl=60 -Dnetworkaddress.cache.negative.ttl=0  -Dlogging.level.org.springframework=INFO "
-	}],
+	}, {
+        "name": "DEPLOY_UNIX_TIME",
+        "value": "${deploy_unix_time}"
+    }],
 	"cpu": 100
 }]
