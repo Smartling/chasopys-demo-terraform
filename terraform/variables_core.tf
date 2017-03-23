@@ -3,11 +3,6 @@ variable "service_name" {
   default = "chasopys-demo"
 }
 
-variable "service_tag" {
-  description = "Full service name used for tagging"
-  default = "chasopys-demo"
-}
-
 variable "environment_name" {
   default = "dev"
   description = "Environment name to name and tag AWS resources (tag=environment)"
@@ -21,16 +16,6 @@ variable "aws_region" {
 variable "vpc_id" {
   default = "vpc-0c686b68"
   description = "VPC Id in which to create AWS resources like Ec2 instances, ELBs etc."
-}
-
-variable "asg_min_size" {
-  description = "Minimum number of instances to run in Autoscaling group"
-  default = 1
-}
-
-variable "asg_max_size" {
-  description = "Maximum number of instances to run in the Autoscaling group"
-  default = 1
 }
 
 variable "git_commit" {
@@ -51,26 +36,6 @@ variable "subnet_ids" {
   description = "Comma separated list of subnet ids in which to create AWS resources like ELBs, Ec2 instances."
 }
 
-variable "ec2_instance_type" {
-  description = "Name of the AWS instance type"
-  default = "t2.small"
-}
-
-variable "ec2_instance_root_volume_size" {
-  description = "Size of EBS root volume for EC2 instances."
-  default = "16"
-}
-
-variable "ec2_instance_root_volume_type" {
-  description = "Type of EBS root volume for EC2 instances."
-  default = "gp2"
-}
-
-variable "asg_healthcheck_grace_period" {
-  default = "300"
-  description = "Time after instance comes into service before checking health"
-}
-
 variable "availability_zones" {
   description = "Comma separated list of EC2 availability zones to launch instances."
   default = "us-east-1d,us-east-1e,us-east-1c,us-east-1a"
@@ -84,38 +49,8 @@ variable "docker_registry" {
   description = "Docker registry URL e.g. docker-registry.domain.ltd"
 }
 
-variable "docker_cleanup_interval_seconds" {
-  default = 10800
-  description = "Interval for docker containers and volumes cleanup."
-}
-
 variable "elb_cert_id" {
   description = "IAM Certificate id for ELB."
-}
-
-variable "elb_health_check_url" {
-  description = "Relative URL for ELB health checks."
-  default = "/health"
-}
-
-variable "asg_healthcheck_type" {
-  default = "EC2"
-  description = "Type of health check for ASG: EC2 or ELB. See documentation for more details."
-}
-
-variable "deployment_minimum_healthy_percent" {
-  default = "50"
-  description = "Minimum percentage of healthy hosts remaining up during deployment."
-}
-
-variable "deployment_maximum_percent" {
-  default = "200"
-  description = "Minimum percentage of hosts that is up during deployment."
-}
-
-variable "ecs_service_task_desired_count" {
-  default = "2"
-  description = "Number of service nodes to run."
 }
 
 variable "route53_zone_id" {
@@ -124,10 +59,6 @@ variable "route53_zone_id" {
 
 variable "deploy_unix_time" {
   default = "-1"
-}
-
-variable "service_domain" {
-  default = "chasopys.spock.dev.smartling.net"
 }
 
 variable "ami_id" {

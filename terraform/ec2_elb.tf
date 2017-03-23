@@ -9,8 +9,6 @@ resource "aws_elb" "service_elb" {
   connection_draining = true
   connection_draining_timeout = 120
 
-  # WARNING: it's highly recommended to use HTTPS instance_protocol
-  # to encrypt communication between ELB and instance/container with application.
   listener {
     instance_port = 443
     instance_protocol = "https"
@@ -23,7 +21,7 @@ resource "aws_elb" "service_elb" {
     healthy_threshold = 3
     unhealthy_threshold = 10
     timeout = 15
-    target = "HTTPS:443${var.elb_health_check_url}"
+    target = "HTTPS:443/health"
     interval = 20
   }
 

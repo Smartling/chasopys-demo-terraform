@@ -26,14 +26,20 @@ resource "aws_ecs_task_definition" "task_def" {
 
 # ECS service
 resource "aws_ecs_service" "ecs_service" {
+
   name = "tf-${var.service_name}-${var.environment_name}"
   cluster = "${aws_ecs_cluster.ecs_cluster.id}"
   task_definition = "${aws_ecs_task_definition.task_def.arn}"
-  desired_count = "${var.ecs_service_task_desired_count}"
   iam_role = "${aws_iam_role.iam_role.arn}"
 
-  deployment_minimum_healthy_percent = "${var.deployment_minimum_healthy_percent}"
-  deployment_maximum_percent = "${var.deployment_maximum_percent}"
+  # Number of service nodes to run.
+  desired_count = "2"
+
+  # Minimum percentage of healthy hosts remaining up during deployment.
+  deployment_minimum_healthy_percent = "50"
+
+  # Maximum percentage of hosts that is up during deployment.
+  deployment_maximum_percent = "100"
 
   load_balancer {
     elb_name = "${aws_elb.service_elb.id}"
@@ -52,10 +58,6 @@ data "template_file" "service_task_def_containers_template" {
   vars {
     docker_registry = "${var.docker_registry}"
     git_commit = "${var.git_commit}"
-    ecs_cluster_name = "${aws_ecs_cluster.ecs_cluster.name}"
-    splunk_application_name = "${var.service_name}-${var.environment_name}"
-    eureka_instance_hostname = "${var.service_domain}"
-    docker_cleanup_interval_seconds = "${var.docker_cleanup_interval_seconds}"
     deploy_unix_time = "${var.deploy_unix_time}"
   }
 }

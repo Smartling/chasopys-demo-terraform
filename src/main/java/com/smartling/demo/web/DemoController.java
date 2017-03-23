@@ -11,10 +11,10 @@ import static org.springframework.web.bind.annotation.RequestMethod.GET;
 @Controller
 public class DemoController
 {
-    @RequestMapping(value = "/chasopys-api/v1/greeting", method = GET)
+    @RequestMapping(value = "/chasopys-api/v1/greeting/{text}", method = GET)
     @ResponseBody
-    Greeting getGreeting()
+    Greeting getGreeting(@PathVariable(name = "text") String text)
     {
-        return new Greeting("Hi, people!");
+        return new Greeting("Hi, " + text + "!");
     }
 }

@@ -4,13 +4,17 @@ resource "aws_autoscaling_group" "autoscaling_group" {
   availability_zones = ["${split(",", var.availability_zones)}"]
   depends_on = [ "aws_launch_configuration.ecs_cluster_asg_launch_config" ]
   vpc_zone_identifier = ["${split(",", lookup(var.subnet_ids, var.availability_zones))}"]
-  min_size = "${var.asg_min_size}"
-  max_size = "${var.asg_max_size}"
+
   launch_configuration = "${aws_launch_configuration.ecs_cluster_asg_launch_config.name}"
 
-  health_check_grace_period = "${var.asg_healthcheck_grace_period}"
+  #Time after instance comes into service before checking health
+  health_check_grace_period = "300"
 
-  health_check_type = "${var.asg_healthcheck_type}"
+  #Type of health check for ASG: EC2 or ELB. See documentation for more details.
+  health_check_type = "EC2"
+
+  min_size = "2"
+  max_size = "2"
 
   load_balancers = ["${split(",", aws_elb.service_elb.id)}"]
 
@@ -33,17 +37,18 @@ resource "aws_autoscaling_group" "autoscaling_group" {
 resource "aws_launch_configuration" "ecs_cluster_asg_launch_config" {
   name_prefix = "tf-${var.service_name}-${var.environment_name}-"
   image_id = "${var.ami_id}"
-  instance_type = "${var.ec2_instance_type}"
   iam_instance_profile = "${aws_iam_instance_profile.iam_instance_profile.id}"
   security_groups = ["${aws_security_group.ecs_security_group.id}"]
+  user_data = "${data.template_file.launch_configuration_userdata.rendered}"
+
+  instance_type = "t2.small"
 
   root_block_device {
-    volume_type = "${var.ec2_instance_root_volume_type}"
-    volume_size = "${var.ec2_instance_root_volume_size}"
+    volume_type = "gp2"
+    volume_size = "16"
   }
 
   associate_public_ip_address = false
-  user_data = "${data.template_file.launch_configuration_userdata.rendered}"
   lifecycle { create_before_destroy = true }
 }
 
@@ -51,10 +56,9 @@ data "template_file" "launch_configuration_userdata" {
   template = "${file("files/launch_configuration_userdata.tmpl")}"
   vars {
     ecs_cluster_name = "${aws_ecs_cluster.ecs_cluster.name}"
-    ecs_cleanup_interval_seconds = "${var.docker_cleanup_interval_seconds}"
+    ecs_cleanup_interval_seconds = "10800" #Interval for docker containers and volumes cleanup
     environment_name = "${var.environment_name}"
     service_name = "${var.service_name}"
-    service_tag = "${var.service_tag}"
   }
 }
 
