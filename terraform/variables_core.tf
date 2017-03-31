@@ -14,7 +14,7 @@ variable "aws_region" {
 }
 
 variable "vpc_id" {
-  default = "vpc-0c686b68"
+  default = "-1"
   description = "VPC Id in which to create AWS resources like Ec2 instances, ELBs etc."
 }
 
@@ -62,5 +62,5 @@ variable "deploy_unix_time" {
 }
 
 variable "ami_id" {
-  default = "ami-23000434" # Smartling SOA AMI
+  default = "ami-e06e8e8d"
 }
